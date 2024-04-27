@@ -1,0 +1,111 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+class Player {
+	constructor(scene, key) {
+		this.object = new THREE.Mesh(new THREE.SphereGeometry(0.7), new THREE.MeshBasicMaterial({ color: 0xff3030 }));
+		this.object.position.y = 10
+		scene.add(this.object);
+
+		this.y_velocity = 0
+		this.jump_up_key = key
+	};
+	applyGravity() {
+
+		if (this.y_velocity > -0.4) {
+			this.y_velocity -= 0.01
+		}
+
+		this.object.position.y += this.y_velocity
+		if (this.object.position.y < 0) {
+			this.object.position.y = 0
+			this.y_velocity = 0
+		}
+		document.getElementById("info").innerHTML = this.y_velocity
+	}
+	removeFromScene(scene) {
+		scene.remove(this.object)
+
+	}
+}
+
+class Obstacle {
+	constructor(scene) {
+		this.object = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff3030 }));
+		this.object.position.x = 25
+		scene.add(this.object);
+	}
+	applyShift() {	
+
+		this.object.position.x -= 0.06
+	}
+	removeFromScene(scene) {
+		scene.remove(this.object)
+
+	}
+}
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+const axesHelper = new THREE.AxesHelper(5);
+
+scene.add(camera);
+scene.add(axesHelper);
+
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+camera.position.set(0, 20, 100);
+controls.update();
+
+const geometry = new THREE.BoxGeometry(50, 0.5, 10);
+const material = new THREE.MeshBasicMaterial({ color: 0x3224f2 });
+const flor = new THREE.Mesh(geometry, material);
+scene.add(flor);
+flor.position.y = -0.5
+
+
+
+const player = new Player(scene, 32);
+const obstaclesInView = []
+
+
+function handleObstacles() {
+	if (obstaclesInView.length == 0) {
+		obstaclesInView.push(new Obstacle(scene));
+	} else {
+
+		obstaclesInView[0].applyShift()
+	}
+
+	if (obstaclesInView[0].object.position.x <= -25) {
+		obstaclesInView[0].removeFromScene(scene);
+		obstaclesInView.shift()
+	}
+
+}
+
+
+document.addEventListener('keydown', function (event) {
+	switch (event.key) {
+		case ' ':
+			player.y_velocity += 0.4;
+			break;
+	}
+});
+
+
+
+function animate() {
+	requestAnimationFrame(animate);
+	controls.update();
+
+	handleObstacles();
+	player.applyGravity();
+
+	renderer.render(scene, camera);
+}
+
+animate();
