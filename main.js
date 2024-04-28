@@ -1,31 +1,32 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+
 class Player {
 	constructor(scene, key) {
 		this.object = new THREE.Mesh(new THREE.SphereGeometry(0.7), new THREE.MeshBasicMaterial({ color: 0xff3030 }));
-		this.object.position.y = 10
+		this.object.position.y = 30
 		scene.add(this.object);
-
-		this.y_velocity = 0
-		this.jump_up_key = key
+		this.framesFalling = 0;
+		this.framesSincePress = 0;
+		this.y_velocity = 0;
 	};
 	applyGravity() {
-
-		if (this.y_velocity > -0.4) {
-			this.y_velocity -= 0.01
+		player.framesSincePress += 1
+		if (this.y_velocity > -1) {
+			this.y_velocity -= 0.05 * (this.framesFalling / 20)
+			this.framesFalling += 1
 		}
 
 		this.object.position.y += this.y_velocity
 		if (this.object.position.y < 0) {
 			this.object.position.y = 0
 			this.y_velocity = 0
+			this.framesFalling = 0
 		}
-		document.getElementById("info").innerHTML = this.y_velocity
 	}
 	removeFromScene(scene) {
 		scene.remove(this.object)
-
 	}
 }
 
@@ -35,7 +36,7 @@ class Obstacle {
 		this.object.position.x = 25
 		scene.add(this.object);
 	}
-	applyShift() {	
+	applyShift() {
 
 		this.object.position.x -= 0.06
 	}
@@ -91,12 +92,17 @@ function handleObstacles() {
 document.addEventListener('keydown', function (event) {
 	switch (event.key) {
 		case ' ':
-			player.y_velocity += 0.4;
+			if (player.framesSincePress > 10) {
+				player.framesSincePress = 0;
+				player.y_velocity = 0;
+				player.framesFalling = 0;
+				player.y_velocity += 0.6;
+			}
 			break;
 	}
 });
 
-
+let frames = 0, prevTime = performance.now();
 
 function animate() {
 	requestAnimationFrame(animate);
@@ -104,6 +110,16 @@ function animate() {
 
 	handleObstacles();
 	player.applyGravity();
+
+	frames++;
+	const time = performance.now();
+	if (time >= prevTime + 1000) {
+
+		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime))
+		frames = 0;
+		prevTime = time;
+
+	}
 
 	renderer.render(scene, camera);
 }
