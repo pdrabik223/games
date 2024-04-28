@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Player } from "./Player.js";
 import { Obstacle, ObstacleState } from "./Obstacle.js";
-
+import { randyEngine } from './Randy.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
@@ -28,7 +28,7 @@ scene.add(celling);
 scene.add(flor);
 
 
-let players = [new Player(scene, 4), new Player(scene, 5)]
+let players = [new Player(scene, 2), new Player(scene, 4, "Randy")]
 let obstaclesInView = []
 
 
@@ -69,9 +69,6 @@ document.addEventListener('keydown', function (event) {
 			players[0].applyJump()
 			break;
 
-		case 'w':
-			players[1].applyJump()
-			break;
 	}
 });
 
@@ -129,6 +126,9 @@ function animate() {
 	// controls.update();
 	animateObjects();
 	calculateCollision();
+	if (randyEngine()) {
+		players[1].applyJump();
+	}
 
 	renderer.render(scene, camera);
 

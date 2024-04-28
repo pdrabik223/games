@@ -13,7 +13,7 @@ const colorNameMapping = [
 ]
 
 class Player {
-    constructor(scene, playerId) {
+    constructor(scene, playerId, name = null) {
         this.object = new THREE.Mesh(new THREE.SphereGeometry(0.7), new THREE.MeshBasicMaterial({ color: colorNameMapping[playerId][1] }));
         this.object.position.y = 30
         scene.add(this.object);
@@ -23,9 +23,16 @@ class Player {
         this.points = 0;
         this.playerId = playerId
         this.isDead = false
+        if (name == null)
+        {
+            this.name = colorNameMapping[this.playerId][0]
+        }else{
+            this.name = name
+
+        }
     };
     getName() {
-        return colorNameMapping[this.playerId][0]
+        return this.name
     }
     addPoint() {
         if (!this.isDead) {
