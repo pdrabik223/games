@@ -9,19 +9,19 @@ class Player {
 		scene.add(this.object);
 		this.framesFalling = 0;
 		this.framesSincePress = 0;
-		this.y_velocity = 0;
+		this.yVelocity = 0;
 	};
 	applyGravity() {
 		player.framesSincePress += 1
-		if (this.y_velocity > -1) {
-			this.y_velocity -= 0.05 * (this.framesFalling / 20)
+		if (this.yVelocity > -1) {
+			this.yVelocity -= 0.05 * (this.framesFalling / 20)
 			this.framesFalling += 1
 		}
 
-		this.object.position.y += this.y_velocity
+		this.object.position.y += this.yVelocity
 		if (this.object.position.y < 0) {
 			this.object.position.y = 0
-			this.y_velocity = 0
+			this.yVelocity = 0
 			this.framesFalling = 0
 		}
 	}
@@ -61,9 +61,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 camera.position.set(0, 20, 100);
 controls.update();
 
-const geometry = new THREE.BoxGeometry(50, 0.5, 10);
-const material = new THREE.MeshBasicMaterial({ color: 0x3224f2 });
-const flor = new THREE.Mesh(geometry, material);
+const flor = new THREE.Mesh(new THREE.BoxGeometry(50, 0.5, 10), new THREE.MeshBasicMaterial({ color: 0x3224f2 }));
 scene.add(flor);
 flor.position.y = -0.5
 
@@ -94,9 +92,8 @@ document.addEventListener('keydown', function (event) {
 		case ' ':
 			if (player.framesSincePress > 10) {
 				player.framesSincePress = 0;
-				player.y_velocity = 0;
 				player.framesFalling = 0;
-				player.y_velocity += 0.6;
+				player.yVelocity = 0.6;
 			}
 			break;
 	}
