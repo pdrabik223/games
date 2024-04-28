@@ -39,9 +39,7 @@ function handleObstacles() {
 		let number_of_incoming = 0
 
 		for (let i = 0; i < obstaclesInView.length; i++) {
-			let addPoint = obstaclesInView[i].applyShift()
-			if (addPoint) {
-				// console.log(addPoint)
+			if (obstaclesInView[i].applyShift()) {
 
 				for (let p = 0; p < players.length; p++) {
 					players[p].addPoint();
@@ -78,7 +76,6 @@ document.addEventListener('keydown', function (event) {
 });
 
 let frames = 0, prevTime = performance.now();
-var noPoints = 0;
 function animateObjects() {
 
 	handleObstacles();

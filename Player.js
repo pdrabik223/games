@@ -18,8 +18,8 @@ class Player {
         this.object.position.y = 30
         scene.add(this.object);
         this.yVelocity = 0;
-        this.timeFromLastFrame = 0;
-        this.timeFromLastJump = 0;
+        this.timeOfLastFrame = 0;
+        this.timeOfLastJump = -100;
         this.points = 0;
         this.playerId = playerId
         this.isDead = false
@@ -34,11 +34,11 @@ class Player {
     }
     applyGravity() {
 
-        if (this.timeFromLastFrame == 0) {
-            this.timeFromLastFrame = performance.now();
+        if (this.timeOfLastFrame == 0) {
+            this.timeOfLastFrame = performance.now();
         } else {
-            let elapsedTime = performance.now() - this.timeFromLastFrame;
-            this.timeFromLastFrame = performance.now();
+            let elapsedTime = performance.now() - this.timeOfLastFrame;
+            this.timeOfLastFrame = performance.now();
 
             if (this.yVelocity > -1) {
                 this.yVelocity -= 0.0002 * elapsedTime
@@ -58,16 +58,13 @@ class Player {
         this.isDead = true;
     }
     applyJump() {
-        if (this.isDead) {return}
-        if (this.timeFromLastJump == 0) {
-            this.timeFromLastJump = performance.now();
-        } else {
-            let elapsedTime = performance.now() - this.timeFromLastJump;
-            this.timeFromLastJump = performance.now();
-            if (elapsedTime > 10) {
-                this.yVelocity = 0.06;
-            }
+        if (this.isDead) { return }
+        let elapsedTime = performance.now() - this.timeOfLastJump;
+        if (elapsedTime > 10) {
+            this.timeOfLastJump = performance.now();
+            this.yVelocity = 0.06;
         }
+
     }
     removeFromScene(scene) {
         scene.remove(this.object)
