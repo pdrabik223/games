@@ -27,7 +27,8 @@ flor.position.y = 20.5
 scene.add(celling);
 scene.add(flor);
 
-const player = new Player(scene, 32);
+
+let players = [new Player(scene, 4), new Player(scene, 5)]
 let obstaclesInView = []
 
 
@@ -38,7 +39,16 @@ function handleObstacles() {
 		let number_of_incoming = 0
 
 		for (let i = 0; i < obstaclesInView.length; i++) {
-			obstaclesInView[i].applyShift()
+			let addPoint = obstaclesInView[i].applyShift()
+			if (addPoint) {
+				// console.log(addPoint)
+
+				for (let p = 0; p < players.length; p++) {
+					players[p].addPoint();
+				}
+
+			}
+
 			if (obstaclesInView[i].state == ObstacleState.Incoming) {
 				number_of_incoming += 1
 			}
@@ -58,7 +68,11 @@ function handleObstacles() {
 document.addEventListener('keydown', function (event) {
 	switch (event.key) {
 		case ' ':
-			player.applyJump()
+			players[0].applyJump()
+			break;
+
+		case 'w':
+			players[1].applyJump()
 			break;
 	}
 });
@@ -68,8 +82,10 @@ var noPoints = 0;
 function animateObjects() {
 
 	handleObstacles();
-	player.applyGravity();
+	for (let i = 0; i < players.length; i++) {
+		players[i].applyGravity();
 
+	}
 }
 function abs(val) {
 	if (val < 0) return -val;
@@ -77,10 +93,8 @@ function abs(val) {
 
 }
 function calculateCollision() {
-	let removePoints = false;
 	let obstaclePositionX = null;
 	let obstaclePositionY = null;
-	let playerPositionY = player.object.position.y
 	let collisionObstacleId = null;
 
 	for (let i = 0; i < obstaclesInView.length; i++) {
@@ -98,37 +112,39 @@ function calculateCollision() {
 	if (collisionObstacleId == null) {
 		return
 	}
-
-	if (obstaclePositionY + 5 > playerPositionY - 0.7) {
-		removePoints = true;
-		obstaclesInView[collisionObstacleId].changeColor(0xff3030)
-	}
-	if (obstaclePositionY + 5 + 10 < playerPositionY + 0.7) {
-		removePoints = true;
-		obstaclesInView[collisionObstacleId].changeColor(0xff3030)
-	}
-	if (removePoints) {
-		noPoints = 0;
+	for (let i = 0; i < players.length; i++) {
+		if (obstaclePositionY + 5 > players[i].object.position.y - 0.7) {
+			players[i].kill()
+			obstaclesInView[collisionObstacleId].changeColor(0xff3030)
+		}
+		if (obstaclePositionY + 5 + 10 < players[i].object.position.y + 0.7) {
+			players[i].kill()
+			obstaclesInView[collisionObstacleId].changeColor(0xff3030)
+		}
 	}
 
 }
 function animate() {
 
-		const time = performance.now();
+	const time = performance.now();
 
-		requestAnimationFrame(animate);
-		// controls.update();
-		animateObjects();
-		calculateCollision();
+	requestAnimationFrame(animate);
+	// controls.update();
+	animateObjects();
+	calculateCollision();
 
-		renderer.render(scene, camera);
-		
-		frames++;
-		if (time >= prevTime + 1000) {
-			document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime)) + "\nPoints: " + noPoints
-			frames = 0;
-			prevTime = time;
+	renderer.render(scene, camera);
+
+	frames++;
+	if (time >= prevTime + 1000) {
+		let scoreboard = "";
+		for (let i = 0; i < players.length; i++) {
+			scoreboard += " " + players[i].getName() + ": " + players[i].points
 		}
+		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime)) + scoreboard
+		frames = 0;
+		prevTime = time;
+	}
 }
 
 animate();

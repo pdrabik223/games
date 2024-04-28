@@ -64,15 +64,14 @@ class Obstacle {
         if (this.positionX < 2 && this.positionX > -2) {
             if (this.state == ObstacleState.Incoming) {
                 this.state = ObstacleState.Warning
-                // this.changeColor(0xff3030)
             }
         } else {
             if (this.state == ObstacleState.Warning) {
                 this.state = ObstacleState.Cleared
-                // this.changeColor(0x30ff30)
+                return true
             }
         }
-
+        return false
     }
     removeFromScene(scene) {
         for (let i = 0; i < this.objects.length; i++) {
