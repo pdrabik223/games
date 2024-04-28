@@ -18,7 +18,7 @@ const ObstacleState = {
 class Obstacle {
     constructor(scene) {
         this.positionX = 25
-        this.positionY = getRandomInt(-5, 5)
+        this.positionY = getRandomInt(-4, 6)
 
         this.objects = []
         this.time = 0
@@ -64,12 +64,12 @@ class Obstacle {
         if (this.positionX < 2 && this.positionX > -2) {
             if (this.state == ObstacleState.Incoming) {
                 this.state = ObstacleState.Warning
-                this.changeColor(0xff3030)
+                // this.changeColor(0xff3030)
             }
         } else {
             if (this.state == ObstacleState.Warning) {
                 this.state = ObstacleState.Cleared
-                this.changeColor(0x30ff30)
+                // this.changeColor(0x30ff30)
             }
         }
 

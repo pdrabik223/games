@@ -31,10 +31,7 @@ class Player {
 
     }
     applyJump() {
-
-
         this.yVelocity = 0.06;
-
     }
     removeFromScene(scene) {
         scene.remove(this.object)

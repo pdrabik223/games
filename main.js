@@ -64,31 +64,71 @@ document.addEventListener('keydown', function (event) {
 });
 
 let frames = 0, prevTime = performance.now();
-
+var noPoints = 0;
 function animateObjects() {
 
 	handleObstacles();
 	player.applyGravity();
 
 }
+function abs(val) {
+	if (val < 0) return -val;
+	return val;
 
-function animate() {
-	const time = performance.now();
+}
+function calculateCollision() {
+	let removePoints = false;
+	let obstaclePositionX = null;
+	let obstaclePositionY = null;
+	let playerPositionY = player.object.position.y
+	let collisionObstacleId = null;
 
-	requestAnimationFrame(animate);
-	controls.update();
-	animateObjects();
-	
+	for (let i = 0; i < obstaclesInView.length; i++) {
 
-	renderer.render(scene, camera);
-	frames ++;
-
-	if (time >= prevTime + 1000) {
-		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime))
-		frames = 0;
-		prevTime = time;
+		if (abs(obstaclesInView[i].positionX) - 0.5 - 0.7 < 0) {
+			obstaclePositionX = obstaclesInView[i].positionX
+			obstaclePositionY = obstaclesInView[i].positionY
+			collisionObstacleId = i;
+			break;
+		} else {
+			obstaclesInView[i].changeColor(0x30ff30)
+		}
 	}
 
+	if (collisionObstacleId == null) {
+		return
+	}
+
+	if (obstaclePositionY + 5 > playerPositionY - 0.7) {
+		removePoints = true;
+		obstaclesInView[collisionObstacleId].changeColor(0xff3030)
+	}
+	if (obstaclePositionY + 5 + 10 < playerPositionY + 0.7) {
+		removePoints = true;
+		obstaclesInView[collisionObstacleId].changeColor(0xff3030)
+	}
+	if (removePoints) {
+		noPoints = 0;
+	}
+
+}
+function animate() {
+
+		const time = performance.now();
+
+		requestAnimationFrame(animate);
+		// controls.update();
+		animateObjects();
+		calculateCollision();
+
+		renderer.render(scene, camera);
+		
+		frames++;
+		if (time >= prevTime + 1000) {
+			document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime)) + "\nPoints: " + noPoints
+			frames = 0;
+			prevTime = time;
+		}
 }
 
 animate();
