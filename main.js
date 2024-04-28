@@ -65,24 +65,30 @@ document.addEventListener('keydown', function (event) {
 
 let frames = 0, prevTime = performance.now();
 
-function animate() {
-	requestAnimationFrame(animate);
-	controls.update();
+function animateObjects() {
 
 	handleObstacles();
 	player.applyGravity();
 
-	frames++;
+}
+
+function animate() {
 	const time = performance.now();
-	if (time >= prevTime + 1000) {
 
-		document.getElementById("info").innerHTML = "caped fps: " + Math.round((frames * 1000) / (time - prevTime))
-		frames = 0;
-		prevTime = time;
-
-	}
+	requestAnimationFrame(animate);
+	controls.update();
+	animateObjects();
+	
 
 	renderer.render(scene, camera);
+	frames ++;
+
+	if (time >= prevTime + 1000) {
+		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime))
+		frames = 0;
+		prevTime = time;
+	}
+
 }
 
 animate();
