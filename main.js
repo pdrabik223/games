@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Player } from "./Player.js";
-import { Obstacle } from "./Obstacle.js";
+import { Obstacle, ObstacleState } from "./Obstacle.js";
 
 
 const scene = new THREE.Scene();
@@ -20,10 +20,12 @@ camera.position.set(0, 20, 100);
 controls.update();
 
 const flor = new THREE.Mesh(new THREE.BoxGeometry(50, 0.5, 10), new THREE.MeshBasicMaterial({ color: 0x3224f2 }));
-scene.add(flor);
 flor.position.y = -0.5
+const celling = new THREE.Mesh(new THREE.BoxGeometry(50, 0.5, 10), new THREE.MeshBasicMaterial({ color: 0x3224f2 }));
+flor.position.y = 20.5
 
-
+scene.add(celling);
+scene.add(flor);
 
 const player = new Player(scene, 32);
 let obstaclesInView = []
@@ -33,10 +35,20 @@ function handleObstacles() {
 	if (obstaclesInView.length == 0) {
 		obstaclesInView.push(new Obstacle(scene));
 	} else {
-		obstaclesInView[0].applyShift()
+		let number_of_incoming = 0
+
+		for (let i = 0; i < obstaclesInView.length; i++) {
+			obstaclesInView[i].applyShift()
+			if (obstaclesInView[i].state == ObstacleState.Incoming) {
+				number_of_incoming += 1
+			}
+		}
+		if (number_of_incoming < 1) {
+			obstaclesInView.push(new Obstacle(scene));
+		}
 	}
 
-	if (obstaclesInView[0].object.position.x <= -25) {
+	if (obstaclesInView[0].positionX <= -25) {
 		obstaclesInView[0].removeFromScene(scene);
 		obstaclesInView.shift()
 	}
