@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Player } from "./Player.js";
 import { Obstacle, ObstacleState } from "./Obstacle.js";
-import { randyEngine } from './Randy.js';
+import { randyEngine } from './engines/Randy.js';
+import { smartPants } from './engines/SmartPants.js';
+import { Matrix } from "./engines/GenNet.js"
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
@@ -28,7 +30,7 @@ scene.add(celling);
 scene.add(flor);
 
 
-let players = [new Player(scene, 2), new Player(scene, 4, "Randy")]
+let players = [new Player(scene, 2), new Player(scene, 4, "Randy"), new Player(scene, 5, "smartPants")]
 let obstaclesInView = []
 
 

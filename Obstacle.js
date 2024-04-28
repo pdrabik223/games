@@ -85,6 +85,7 @@ class Obstacle {
         }
 
     }
+    
 }
 
 export { Obstacle, ObstacleState };
