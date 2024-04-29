@@ -39,7 +39,6 @@ class Obstacle {
         this.objects[1].position.x = 25
         this.objects[1].position.y = 20 + this.positionY
 
-
     }
     addRotation() {
         for (let i = 0; i < this.objects.length; i++) {
@@ -85,7 +84,7 @@ class Obstacle {
         }
 
     }
-    
+
 }
 
 export { Obstacle, ObstacleState };

@@ -138,7 +138,7 @@ function calculateCollision() {
 
 }
 
-var engines, frames, prevTime, players = [], obstaclesInView = [], gameIteration = 0, prevBestPlayer = 0, prevBestPoints = -1
+var engines, frames, prevTime, players = [], obstaclesInView = [], gameIteration = 0, engineIteration = 0, prevBestPlayer = 0, prevBestPoints = -1
 var bestNet = [new GenNetEngine(), 0]
 function resetGame(noPlayers) {
 	// if (prevBestPlayer != null) {
@@ -165,26 +165,28 @@ function resetGame(noPlayers) {
 	prevTime = performance.now();
 
 	for (let p = 0; p < noPlayers; p++) {
-		players.push(new Player(scene, p, "Besty"))
+		players.push(new Player(scene, p))
 	}
 
 	if (gameIteration == 0 || mostPoints == 0) {
 		engines = []
+		engineIteration = 0
+		// engines[0] = new GenNetEngine(DeepNet.topHugger())
 		for (let p = 0; p < noPlayers; p++) {
 			engines.push(new GenNetEngine())
 		}
 	} else {
+		engineIteration += 1
 		let prevBestEngine = engines[bestPlayer]
 		if (mostPoints > bestNet[1]) {
 			bestNet[0] = prevBestEngine;
 			bestNet[1] = mostPoints;
-			console.log("points: ", mostPoints, "net: ", prevBestEngine.net.toString())
 		}
-		engines[0] = bestNet[0]
-		for (let p = 1; p < players.length; p++) {
+
+		for (let p = 0; p < players.length; p++) {
 			if (p != prevBestEngine) {
-				let deviation = 1 / (mostPoints/10)f5
-				engines[p] = new GenNetEngine(prevBestEngine, deviation)
+				let deviation = 0.001 / (mostPoints)
+				engines[p] = new GenNetEngine(prevBestEngine.net, deviation)
 
 			}
 		}
@@ -193,14 +195,17 @@ function resetGame(noPlayers) {
 	gameIteration += 1
 
 }
+function normalize(min, max, val) {
+	return val / (max - min)
 
+}
 function animate() {
 	var noAlivePlayers = 0;
 	for (let p = 0; p < players.length; p++) {
 		if (!players[p].isDead) { noAlivePlayers += 1; }
 	}
 	if (noAlivePlayers == 0) {
-		resetGame(80);
+		resetGame(120);
 	}
 	const time = performance.now();
 
@@ -215,11 +220,15 @@ function animate() {
 		let collisionObstacleId = getNextObstacle(true);
 
 		if (!players[p].isDead) {
-
-			if (engines[p].getDecision(players[p].object.position.y,
-				players[p].yVelocity,
-				obstaclesInView[collisionObstacleId].positionY,
-				obstaclesInView[collisionObstacleId].positionX)) { players[p].applyJump(); }
+			// console.log("players[p].object.position.y", normalize(0, 20, players[p].object.position.y), players[p].object.position.y)
+			// console.log("players[p].yVelocity", normalize(-1, 0.6, players[p].yVelocity),players[p].yVelocity)
+			// console.log("obstaclesInViewF[collisionObstacleId].positionY", normalize(0, 20, obstaclesInView[collisionObstacleId].positionY), obstaclesInView[collisionObstacleId].positionY)
+			console.log("obstaclesInView[collisionObstacleId].positionX", normalize(-20, 1, obstaclesInView[collisionObstacleId].positionX), obstaclesInView[collisionObstacleId].positionX)
+			if (engines[p].getDecision(
+				normalize(0, 20, players[p].object.position.y),
+				normalize(-1, 0.6, players[p].yVelocity),
+				normalize(-4, 6, obstaclesInView[collisionObstacleId].positionY),
+				normalize(-25, 1, obstaclesInView[collisionObstacleId].positionX))) { players[p].applyJump(); }
 		}
 	}
 
@@ -235,7 +244,7 @@ function animate() {
 		}
 		let scoreboard = " " + players[bestPlayer].getName() + ": " + players[bestPlayer].points
 
-		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime)) + scoreboard + " Iteration: " + gameIteration
+		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime)) + scoreboard + " Iteration: " + gameIteration + " Engine Iteration: " + engineIteration
 		frames = 0;
 		prevTime = time;
 	}
