@@ -1,4 +1,5 @@
 function getRandomVal(min, max) {
+
     return min + Math.random() * (max - min);
 }
 
@@ -147,6 +148,20 @@ class DeepNet {
             this.biases.push(Matrix.randomMatrix(this.netShape[i], 1));
         }
     }
+
+    static fromDeepNet(newNet) {
+        this.netShape = newNet.netShape;
+        this.weights = []
+        this.biases = []
+
+        for (let i = 1; i < this.netShape.length; i++) {
+            this.weights.push(Matrix.fromMatrix(newNet.weights[i]));
+        }
+        for (let i = 1; i < this.netShape.length; i++) {
+            this.biases.push(Matrix.fromMatrix(newNet.biases[i]));
+        }
+
+    }
     static ReLu(val) {
         if (val > 0) return val
         return 0
@@ -181,28 +196,29 @@ class DeepNet {
 
     }
 
+    randomize(deviation) {
+        for (let i = 0; i < this.weights.length; i++) {
+            this.weights[i].randomize(deviation)
+        }
+        for (let i = 0; i < this.biases.length; i++) {
+            this.biases[i].randomize(deviation)
+        }
+
+    }
+
 }
 
 class GenNetEngine {
-    constructor() {
-        this.net = new DeepNet([4, 5, 5, 1])
+    constructor(existingNet = null, deviation = 0) {
+        if (existingNet == null)
+            this.net = new DeepNet([4, 5, 5, 1])
+        else
+            this.net = existingNet.net
+
+        this.net.randomize(deviation)
+        // console.log(this.net.toString())
     }
 
-    static fromExisting(previousNet, pointsScored) {
-        var newNet = new GenNetEngine()
-        let deviation = 1
-        console.log(deviation)
-        newNet.net = previousNet.net
-
-        for (let i = 0; i < newNet.net.weights.length; i++) {
-            newNet.net.weights[i].randomize(deviation)
-        }
-
-        for (let i = 0; i < newNet.net.biases.length; i++) {
-            newNet.net.biases[i].randomize(deviation)
-        }
-        return newNet
-    }
     getDecision(playerYPosition, playerYAcceleration, obstacleYPosition, obstacleXPosition) {
         var input = new Matrix(4, 1)
         input.data[0][0] = playerYPosition

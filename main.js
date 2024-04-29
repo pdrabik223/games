@@ -139,13 +139,16 @@ function calculateCollision() {
 }
 
 var engines, frames, prevTime, players = [], obstaclesInView = [], gameIteration = 0, prevBestPlayer = 0, prevBestPoints = -1
+var bestNet = [new GenNetEngine(), 0]
 function resetGame(noPlayers) {
 	// if (prevBestPlayer != null) {
 
-	for (let p = 0; p < players.length; p++) {
-		if (players[p].points > prevBestPoints) {
-			prevBestPlayer = p;
-			prevBestPoints = players[p].points
+	let bestPlayer = 0;
+	let mostPoints = 0;
+	for (let i = 1; i < players.length; i++) {
+		if (players[i].points > players[bestPlayer].points) {
+			bestPlayer = i;
+			mostPoints = players[i].points;
 		}
 	}
 	// }
@@ -158,30 +161,36 @@ function resetGame(noPlayers) {
 	}
 	obstaclesInView = []
 
-	gameIteration += 1
 	frames = 0;
 	prevTime = performance.now();
 
 	for (let p = 0; p < noPlayers; p++) {
-		players.push(new Player(scene, p))
+		players.push(new Player(scene, p, "Besty"))
 	}
 
-	if (prevBestPoints == -1) {
+	if (gameIteration == 0 || mostPoints == 0) {
 		engines = []
 		for (let p = 0; p < noPlayers; p++) {
 			engines.push(new GenNetEngine())
 		}
 	} else {
-		let prevBestEngine = engines[prevBestPlayer]
-		for (let p = 0; p < noPlayers; p++) {
+		let prevBestEngine = engines[bestPlayer]
+		if (mostPoints > bestNet[1]) {
+			bestNet[0] = prevBestEngine;
+			bestNet[1] = mostPoints;
+			console.log("points: ", mostPoints, "net: ", prevBestEngine.net.toString())
+		}
+		engines[0] = bestNet[0]
+		for (let p = 1; p < players.length; p++) {
 			if (p != prevBestEngine) {
-				// engines[p] = prevBestEngine
-				engines[p] = GenNetEngine.fromExisting(prevBestEngine, 12)
+				let deviation = 1 / (mostPoints/10)f5
+				engines[p] = new GenNetEngine(prevBestEngine, deviation)
 
 			}
 		}
 
 	}
+	gameIteration += 1
 
 }
 
@@ -191,7 +200,7 @@ function animate() {
 		if (!players[p].isDead) { noAlivePlayers += 1; }
 	}
 	if (noAlivePlayers == 0) {
-		resetGame(40);
+		resetGame(80);
 	}
 	const time = performance.now();
 
@@ -218,10 +227,13 @@ function animate() {
 
 	frames++;
 	if (time >= prevTime + 1000) {
-		let scoreboard = "";
-		for (let i = 0; i < players.length; i++) {
-			scoreboard += " " + players[i].getName() + ": " + players[i].points
+		let bestPlayer = 0;
+		for (let i = 1; i < players.length; i++) {
+			if (players[i].points > players[bestPlayer].points) {
+				bestPlayer = i;
+			}
 		}
+		let scoreboard = " " + players[bestPlayer].getName() + ": " + players[bestPlayer].points
 
 		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime)) + scoreboard + " Iteration: " + gameIteration
 		frames = 0;
