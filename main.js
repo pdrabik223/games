@@ -4,7 +4,7 @@ import { Player } from "./Player.js";
 import { Obstacle, ObstacleState } from "./Obstacle.js";
 import { randyEngine } from './engines/Randy.js';
 import { smartPants } from './engines/SmartPants.js';
-import { Matrix } from "./engines/GenNet.js"
+import { Matrix, DeepNet } from "./engines/GenNet.js"
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
@@ -120,6 +120,8 @@ function calculateCollision() {
 	}
 
 }
+
+var net = new DeepNet([4, 5, 5, 1])
 function animate() {
 
 	const time = performance.now();
@@ -131,7 +133,16 @@ function animate() {
 	if (randyEngine()) {
 		players[1].applyJump();
 	}
+	var input = new Matrix(4, 1)
+	input.data[0][0] = 1
+	input.data[0][1] = 2
+	input.data[0][2] = 3
+	input.data[0][3] = 4
 
+	console.log(input.toString())
+	console.log("")
+	console.log(net.toString())	
+	console.log(net.forwardProp(input).toString())
 	renderer.render(scene, camera);
 
 	frames++;
