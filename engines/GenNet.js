@@ -52,12 +52,12 @@ class Matrix {
             }
         }
     }
-    applyFunction(func) {
-        let newMatrix = new Matrix(this.width, this.height);
+    static applyFunction(a, func) {
+        let newMatrix = new Matrix(a.width, a.height);
 
-        for (let h = 0; h < this.height; h++) {
-            for (let w = 0; w < this.width; w++) {
-                newMatrix.data[h][w] = func(this.data[h][w]);
+        for (let h = 0; h < a.height; h++) {
+            for (let w = 0; w < a.width; w++) {
+                newMatrix.data[h][w] = func(a.data[h][w]);
             }
         }
         return newMatrix
@@ -143,7 +143,7 @@ class DeepNet {
         for (let i = 1; i < this.netShape.length; i++) {
             this.weights.push(Matrix.randomMatrix(netShape[i], netShape[i - 1]));
         }
-        for (let i = 1; i < this.netShape.length ; i++) {
+        for (let i = 1; i < this.netShape.length; i++) {
             this.biases.push(Matrix.randomMatrix(this.netShape[i], 1));
         }
     }
@@ -152,13 +152,17 @@ class DeepNet {
         return 0
 
     }
+    static Logistic(val) {
+        return 1 / (1 + Math.pow(Math.E, -val))
+
+    }
 
     forwardProp(input) {
         var next = input;
-        for (let i = 0; i < this.netShape.length-1; i++) {
+        for (let i = 0; i < this.netShape.length - 1; i++) {
             next = Matrix.multiply(next, this.weights[i])
             next = Matrix.sum(next, this.biases[i])
-            next = next.applyFunction(DeepNet.ReLu)
+            next = Matrix.applyFunction(next, DeepNet.Logistic)
         }
         return next;
     }
@@ -179,8 +183,36 @@ class DeepNet {
 
 }
 
-class GenNetEngine{
+class GenNetEngine {
+    constructor() {
+        this.net = new DeepNet([4, 5, 5, 1])
+    }
 
+    static fromExisting(previousNet, pointsScored) {
+        var newNet = new GenNetEngine()
+        let deviation = 1
+        console.log(deviation)
+        newNet.net = previousNet.net
+
+        for (let i = 0; i < newNet.net.weights.length; i++) {
+            newNet.net.weights[i].randomize(deviation)
+        }
+
+        for (let i = 0; i < newNet.net.biases.length; i++) {
+            newNet.net.biases[i].randomize(deviation)
+        }
+        return newNet
+    }
+    getDecision(playerYPosition, playerYAcceleration, obstacleYPosition, obstacleXPosition) {
+        var input = new Matrix(4, 1)
+        input.data[0][0] = playerYPosition
+        input.data[0][1] = playerYAcceleration
+        input.data[0][2] = obstacleXPosition
+        input.data[0][3] = obstacleYPosition
+        let result = this.net.forwardProp(input).data[0][0]
+
+        return result > 0.5
+    }
 
 }
-export { Matrix, DeepNet };
+export { Matrix, DeepNet, GenNetEngine };

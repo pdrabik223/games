@@ -61,7 +61,7 @@ class Obstacle {
             this.objects[i].position.x = this.positionX;
         }
 
-        if (this.positionX < 2 && this.positionX > -2) {
+        if (this.positionX < 3 && this.positionX > -3) {
             if (this.state == ObstacleState.Incoming) {
                 this.state = ObstacleState.Warning
             }

@@ -4,7 +4,7 @@ import { Player } from "./Player.js";
 import { Obstacle, ObstacleState } from "./Obstacle.js";
 import { randyEngine } from './engines/Randy.js';
 import { smartPants } from './engines/SmartPants.js';
-import { Matrix, DeepNet } from "./engines/GenNet.js"
+import { Matrix, DeepNet, GenNetEngine } from "./engines/GenNet.js"
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
@@ -30,8 +30,6 @@ scene.add(celling);
 scene.add(flor);
 
 
-let players = [new Player(scene, 2), new Player(scene, 4, "Randy"), new Player(scene, 5, "smartPants")]
-let obstaclesInView = []
 
 
 function handleObstacles() {
@@ -65,16 +63,15 @@ function handleObstacles() {
 
 }
 
-document.addEventListener('keydown', function (event) {
-	switch (event.key) {
-		case ' ':
-			players[0].applyJump()
-			break;
+// document.addEventListener('keydown', function (event) {
+// 	switch (event.key) {
+// 		case ' ':
+// 			players[0].applyJump()
+// 			break;
 
-	}
-});
+// 	}
+// });
 
-let frames = 0, prevTime = performance.now();
 function animateObjects() {
 
 	handleObstacles();
@@ -88,26 +85,46 @@ function abs(val) {
 	return val;
 
 }
-function calculateCollision() {
-	let obstaclePositionX = null;
-	let obstaclePositionY = null;
-	let collisionObstacleId = null;
 
+function getObstacleInRange(range, changeColor = false) {
+	// range from 0 
 	for (let i = 0; i < obstaclesInView.length; i++) {
+		if (abs(obstaclesInView[i].positionX) - range < 0) {
 
-		if (abs(obstaclesInView[i].positionX) - 0.5 - 0.7 < 0) {
-			obstaclePositionX = obstaclesInView[i].positionX
-			obstaclePositionY = obstaclesInView[i].positionY
-			collisionObstacleId = i;
-			break;
+			if (changeColor)
+				obstaclesInView[i].changeColor(0xff3030)
+			return i;
 		} else {
-			obstaclesInView[i].changeColor(0x30ff30)
+			if (changeColor)
+				obstaclesInView[i].changeColor(0x30ff30)
 		}
 	}
+	return null
+}
+function getNextObstacle(changeColor = false) {
+	// range from 0 
+	for (let i = 0; i < obstaclesInView.length; i++) {
+		if (obstaclesInView[i].state != ObstacleState.Cleared) {
+			if (changeColor)
+				obstaclesInView[i].changeColor(0xff3030)
+			return i;
+		} else {
+			if (changeColor)
+				obstaclesInView[i].changeColor(0x30ff30)
+		}
+	}
+	return null
+}
+
+function calculateCollision() {
+	// let obstaclePositionX = null;
+	let collisionObstacleId = getObstacleInRange(0.5 + 0.7);
 
 	if (collisionObstacleId == null) {
 		return
 	}
+	// let obstaclePositionX = obstaclesInView[collisionObstacleId].positionX
+	let obstaclePositionY = obstaclesInView[collisionObstacleId].positionY
 	for (let i = 0; i < players.length; i++) {
 		if (obstaclePositionY + 5 > players[i].object.position.y - 0.7) {
 			players[i].kill()
@@ -121,28 +138,82 @@ function calculateCollision() {
 
 }
 
-var net = new DeepNet([4, 5, 5, 1])
-function animate() {
+var engines, frames, prevTime, players = [], obstaclesInView = [], gameIteration = 0, prevBestPlayer = 0, prevBestPoints = -1
+function resetGame(noPlayers) {
+	// if (prevBestPlayer != null) {
 
+	for (let p = 0; p < players.length; p++) {
+		if (players[p].points > prevBestPoints) {
+			prevBestPlayer = p;
+			prevBestPoints = players[p].points
+		}
+	}
+	// }
+	for (let p = 0; p < players.length; p++) {
+		players[p].removeFromScene(scene)
+	}
+	players = []
+	for (let o = 0; o < obstaclesInView.length; o++) {
+		obstaclesInView[o].removeFromScene(scene)
+	}
+	obstaclesInView = []
+
+	gameIteration += 1
+	frames = 0;
+	prevTime = performance.now();
+
+	for (let p = 0; p < noPlayers; p++) {
+		players.push(new Player(scene, p))
+	}
+
+	if (prevBestPoints == -1) {
+		engines = []
+		for (let p = 0; p < noPlayers; p++) {
+			engines.push(new GenNetEngine())
+		}
+	} else {
+		let prevBestEngine = engines[prevBestPlayer]
+		for (let p = 0; p < noPlayers; p++) {
+			if (p != prevBestEngine) {
+				// engines[p] = prevBestEngine
+				engines[p] = GenNetEngine.fromExisting(prevBestEngine, 12)
+
+			}
+		}
+
+	}
+
+}
+
+function animate() {
+	var noAlivePlayers = 0;
+	for (let p = 0; p < players.length; p++) {
+		if (!players[p].isDead) { noAlivePlayers += 1; }
+	}
+	if (noAlivePlayers == 0) {
+		resetGame(40);
+	}
 	const time = performance.now();
 
 	requestAnimationFrame(animate);
 	// controls.update();
 	animateObjects();
 	calculateCollision();
-	if (randyEngine()) {
-		players[1].applyJump();
-	}
-	var input = new Matrix(4, 1)
-	input.data[0][0] = 1
-	input.data[0][1] = 2
-	input.data[0][2] = 3
-	input.data[0][3] = 4
+	// if (randyEngine()) {
+	// 	players[1].applyJump();
+	// }
+	for (let p = 0; p < players.length; p++) {
+		let collisionObstacleId = getNextObstacle(true);
 
-	console.log(input.toString())
-	console.log("")
-	console.log(net.toString())	
-	console.log(net.forwardProp(input).toString())
+		if (!players[p].isDead) {
+
+			if (engines[p].getDecision(players[p].object.position.y,
+				players[p].yVelocity,
+				obstaclesInView[collisionObstacleId].positionY,
+				obstaclesInView[collisionObstacleId].positionX)) { players[p].applyJump(); }
+		}
+	}
+
 	renderer.render(scene, camera);
 
 	frames++;
@@ -151,10 +222,12 @@ function animate() {
 		for (let i = 0; i < players.length; i++) {
 			scoreboard += " " + players[i].getName() + ": " + players[i].points
 		}
-		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime)) + scoreboard
+
+		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime)) + scoreboard + " Iteration: " + gameIteration
 		frames = 0;
 		prevTime = time;
 	}
+
 }
 
 animate();
