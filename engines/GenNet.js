@@ -1,6 +1,7 @@
 function getRandomVal(min, max) {
+    //Math.random() * (max - min) + min;
 
-    return min + Math.random() * (max - min);
+    return (Math.random() * (max - min)) + min;
 }
 
 class Matrix {
@@ -25,17 +26,28 @@ class Matrix {
     // console.log(Matrix.sum(test, test2).toString())
     // console.log("---------")
 
-    constructor(width, height) {
+    constructor(width, height, data = null) {
         this.data = [];
         this.width = width;
         this.height = height;
-
-        for (let h = 0; h < this.height; h++) {
-            this.data.push([]);
-            for (let w = 0; w < this.width; w++) {
-                this.data[h].push(0);
+        
+        if (data == null)
+            for (let h = 0; h < this.height; h++) {
+                this.data.push([]);
+                for (let w = 0; w < this.width; w++) {
+                    this.data[h].push(0);
+                }
             }
-        }
+        else
+            for (let h = 0; h < this.height; h++) {
+                this.data.push([]);
+                for (let w = 0; w < this.width; w++) {
+                    this.data[h] = [...data[h]]
+                }
+            }
+    }
+    static copy(old) {
+        return new Matrix(old.width, old.height, old.data);
     }
 
     fillRandom() {
@@ -74,17 +86,7 @@ class Matrix {
         }
         return newMatrix
     }
-    static fromMatrix(old) {
-        let newMatrix = new Matrix(old.width, old.height);
 
-        for (let h = 0; h < old.height; h++) {
-            for (let w = 0; w < old.width; w++) {
-                newMatrix.data[h][w] = old.data[h][w];
-            }
-        }
-        return newMatrix
-
-    }
     static multiply(a, b) {
         if (a.width != b.height) {
             throw new Error('Matrix multiplication error, a.width != b.height');
@@ -149,19 +151,18 @@ class DeepNet {
         }
     }
 
-    static fromDeepNet(newNet) {
-        this.netShape = newNet.netShape;
-        this.weights = []
-        this.biases = []
+    static copy(old) {
+        let newNet = new DeepNet(old.netShape);
 
-        for (let i = 1; i < this.netShape.length; i++) {
-            this.weights.push(Matrix.fromMatrix(newNet.weights[i]));
+        for (let i = 0; i < newNet.weights.length; i++) {
+            newNet.weights[i] = Matrix.copy(old.weights[i]);
         }
-        for (let i = 1; i < this.netShape.length; i++) {
-            this.biases.push(Matrix.fromMatrix(newNet.biases[i]));
+        for (let i = 0; i < newNet.biases.length; i++) {
+            newNet.biases[i] = Matrix.copy(old.biases[i]);
         }
-
+        return newNet
     }
+
     static ReLu(val) {
         if (val > 0) return val
         return 0
@@ -173,7 +174,7 @@ class DeepNet {
     }
 
     forwardProp(input) {
-        var next = input;
+        var next = Matrix.copy(input);
         for (let i = 0; i < this.netShape.length - 1; i++) {
             next = Matrix.multiply(next, this.weights[i])
             next = Matrix.sum(next, this.biases[i])
@@ -197,6 +198,7 @@ class DeepNet {
     }
 
     randomize(deviation) {
+        console.log("calling randomize")
         for (let i = 0; i < this.weights.length; i++) {
             this.weights[i].randomize(deviation)
         }
@@ -269,9 +271,11 @@ class GenNetEngine {
 
     constructor(existingNet = null, deviation = 0) {
         if (existingNet == null)
-            this.net = new DeepNet([4, 7, 5, 1])
-        else
-            this.net = existingNet
+            this.net = new DeepNet([4, 7, 1])
+        else {
+            // console.log(existingNet)
+            this.net = DeepNet.copy(existingNet)
+        }
 
         if (deviation != 0)
             this.net.randomize(deviation)
@@ -284,6 +288,13 @@ class GenNetEngine {
         input.data[0][1] = playerYAcceleration
         input.data[0][2] = obstacleXPosition
         input.data[0][3] = obstacleYPosition
+
+        if (playerYPosition < 0 || playerYPosition > 1) throw ("playerYPosition: " + playerYPosition)
+        if (playerYAcceleration < 0 || playerYAcceleration > 1) throw ("playerYAcceleration: " + playerYAcceleration)
+        if (obstacleXPosition < 0 || obstacleXPosition > 1) throw ("obstacleXPosition: " + obstacleXPosition)
+        if (obstacleYPosition < 0 || obstacleYPosition > 1) throw ("obstacleYPosition: " + obstacleYPosition)
+
+
         let result = this.net.forwardProp(input).data[0][0]
 
         return result > 0.5

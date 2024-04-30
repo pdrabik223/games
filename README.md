@@ -1,4 +1,5 @@
-# Just some Games written using tree.js
+# Flappy bird clone
+Made in order to play around with generational neural nets  
 
 
 To game server locally: 
