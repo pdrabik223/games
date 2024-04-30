@@ -2,9 +2,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Player } from "./Player.js";
 import { Obstacle, ObstacleState } from "./Obstacle.js";
-import { randyEngine } from './engines/Randy.js';
-import { smartPants } from './engines/SmartPants.js';
-import { Matrix, DeepNet, GenNetEngine } from "./engines/GenNet.js"
+import { Matrix, GenNetEngine } from "./engines/GenNet.js"
+
+import gameConfig from './config.json' assert { type: 'json' };
+console.log(gameConfig)
+
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
@@ -18,13 +20,13 @@ scene.add(axesHelper);
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-camera.position.set(0, 20, 100);
+camera.position.set(0, gameConfig["levelHeight"]/2, 100);
 controls.update();
 
-const flor = new THREE.Mesh(new THREE.BoxGeometry(50, 0.5, 10), new THREE.MeshBasicMaterial({ color: 0x3224f2 }));
-flor.position.y = -0.5
-const celling = new THREE.Mesh(new THREE.BoxGeometry(50, 0.5, 10), new THREE.MeshBasicMaterial({ color: 0x3224f2 }));
-flor.position.y = 20.5
+const flor = new THREE.Mesh(new THREE.BoxGeometry(gameConfig["levelWidth"], 0.5, gameConfig["levelDepth"]), new THREE.MeshBasicMaterial({ color: 0x3224f2 }));
+flor.position.y = -1
+const celling = new THREE.Mesh(new THREE.BoxGeometry(gameConfig["levelWidth"], 0.5, gameConfig["levelDepth"]), new THREE.MeshBasicMaterial({ color: 0x3224f2 }));
+celling.position.y = gameConfig["levelHeight"] + 1
 
 scene.add(celling);
 scene.add(flor);
@@ -54,7 +56,7 @@ function handleObstacles() {
 		}
 	}
 
-	if (obstaclesInView[0].positionX <= -25) {
+	if (obstaclesInView[0].positionX <= - (gameConfig["levelWidth"] / 2)) {
 		obstaclesInView[0].removeFromScene(scene);
 		obstaclesInView.shift()
 	}
@@ -113,18 +115,18 @@ function getNextObstacle(changeColor = false) {
 }
 
 function calculateCollision() {
-	let collisionObstacleId = getObstacleInRange(0.5 + 0.7);
+	let collisionObstacleId = getObstacleInRange(0.5 + gameConfig["playerSize"]);
 
 	if (collisionObstacleId == null) {
 		return
 	}
 	let obstaclePositionY = obstaclesInView[collisionObstacleId].positionY
 	for (let i = 0; i < players.length; i++) {
-		if (obstaclePositionY + 5 > players[i].object.position.y - 0.7) {
+		if (obstaclePositionY + 5 > players[i].object.position.y - gameConfig["playerSize"]) {
 			players[i].kill()
 			obstaclesInView[collisionObstacleId].changeColor(0xff3030)
 		}
-		if (obstaclePositionY + 5 + 10 < players[i].object.position.y + 0.7) {
+		if (obstaclePositionY + 5 + 10 < players[i].object.position.y + gameConfig["playerSize"]) {
 			players[i].kill()
 			obstaclesInView[collisionObstacleId].changeColor(0xff3030)
 		}
@@ -211,10 +213,10 @@ function animate() {
 
 		if (!players[p].isDead) {
 			if (engines[p].getDecision(
-				normalize(0, 20, players[p].object.position.y),
+				normalize(0, gameConfig["levelHeight"], players[p].object.position.y),
 				normalize(-1, 0.6, players[p].yVelocity),
-				normalize(-4, 6, obstaclesInView[collisionObstacleId].positionY),
-				normalize(-3, 25, obstaclesInView[collisionObstacleId].positionX))) { players[p].applyJump(); }
+				normalize(5, gameConfig["levelHeight"] - 5 - 20, obstaclesInView[collisionObstacleId].positionY),
+				normalize(-gameConfig["levelWidth"]/2, gameConfig["levelWidth"]/2, obstaclesInView[collisionObstacleId].positionX))) { players[p].applyJump(); }
 		}
 	}
 

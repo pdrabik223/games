@@ -1,16 +1,6 @@
 import * as THREE from 'three';
-
-
-const colorNameMapping = [
-    ["orange", 0xfa93d],
-    ["green", 0xfa93d],
-    ["pink", 0xdf2ffa],
-    ["blue", 0x2f44fa],
-    ["cyan", 0x2ff0fa],
-    ["red", 0xfa3011],
-    ['yellow', 0xfa3011]
-
-]
+import gameConfig from './config.json' assert { type: 'json' };
+console.log(gameConfig)
 
 var nameList = [
     'Time', 'Past', 'Future', 'Dev',
@@ -45,7 +35,7 @@ class Player {
     constructor(scene, playerId, name = null) {
         let material = new THREE.MeshBasicMaterial({ color: selectColor(playerId, 30) })
         material.opacity = 0.5
-        this.object = new THREE.Mesh(new THREE.SphereGeometry(0.7), material);
+        this.object = new THREE.Mesh(new THREE.SphereGeometry(gameConfig["playerSize"]), material);
 
         this.object.position.y = 30
         scene.add(this.object);
@@ -85,8 +75,8 @@ class Player {
         if (this.object.position.y < 0) {
             this.object.position.y = 0
             this.yVelocity = 0
-        } else if (this.object.position.y > 20) {
-            this.object.position.y = 20
+        } else if (this.object.position.y > gameConfig["levelHeight"]) {
+            this.object.position.y = gameConfig["levelHeight"]
             this.yVelocity = 0
         }
 

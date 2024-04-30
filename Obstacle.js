@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-
+import gameConfig from './config.json' assert { type: 'json' };
+console.log(gameConfig)
 function getRandomInt(min, max) {
     return min + Math.random() * (max - min);
 }
@@ -17,13 +18,13 @@ const ObstacleState = {
 
 class Obstacle {
     constructor(scene) {
-        this.positionX = 25
-        this.positionY = getRandomInt(-4, 6)
+        this.positionX = gameConfig["levelWidth"]/2
+        this.positionY = getRandomInt(5, gameConfig["levelHeight"] - 5 - 20)
 
         this.objects = []
         this.time = 0
-        this.objects[0] = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 1), new THREE.MeshBasicMaterial({ color: 0x30ff30 }));
-        this.objects[0].position.x = 25
+        this.objects[0] = new THREE.Mesh(new THREE.BoxGeometry(5, 5, gameConfig["levelDepth"]), new THREE.MeshBasicMaterial({ color: 0x30ff30 }));
+        this.objects[0].position.x = this.positionX
         this.objects[0].position.y = this.positionY
         this.addSecondBar()
         // this.addRotation()
@@ -35,8 +36,8 @@ class Obstacle {
 
     }
     addSecondBar() {
-        this.objects[1] = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 1), new THREE.MeshBasicMaterial({ color: 0x30ff30 }));
-        this.objects[1].position.x = 25
+        this.objects[1] = new THREE.Mesh(new THREE.BoxGeometry(5, 5, gameConfig["levelDepth"]), new THREE.MeshBasicMaterial({ color: 0x30ff30 }));
+        this.objects[1].position.x = this.positionX
         this.objects[1].position.y = 20 + this.positionY
 
     }
