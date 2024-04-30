@@ -131,13 +131,18 @@ function calculateCollision() {
 	}
 
 }
+function learningRate(noPoints) {
+	return 1 / (noPoints * 1.1)
 
+}
 var engines, frames, prevTime, players = [], obstaclesInView = [], gameIteration = 0, engineIteration = 0
 function resetGame(noPlayers) {
 
 	let bestPlayer = 0;
 	let mostPoints = 0;
 	let sumPoints = 0;
+	prevTime = performance.now();
+	frames = 0;
 	for (let i = 0; i < players.length; i++) {
 		if (players[i].points >= mostPoints) {
 			bestPlayer = i;
@@ -155,8 +160,6 @@ function resetGame(noPlayers) {
 	}
 	obstaclesInView = []
 
-	frames = 0;
-	prevTime = performance.now();
 
 	for (let p = 0; p < noPlayers; p++) {
 		players.push(new Player(scene, p))
@@ -169,16 +172,17 @@ function resetGame(noPlayers) {
 			engines.push(new GenNetEngine())
 		}
 	} else {
-		engineIteration += 1
-		let prevBestNet = DeepNet.copy(engines[bestPlayer].net)
+		console.log("learning rate: ", learningRate(mostPoints))
+		console.log("Best player: ", players[bestPlayer].name, "no points: ", mostPoints)
+		console.log("Best net: ", engines[bestPlayer].net.toString())
 
+
+		engineIteration += 1
 		for (let p = 0; p < players.length; p++) {
 			if (p != bestPlayer) {
-				let deviation = 1 / mostPoints
-				engines[p] = new GenNetEngine(prevBestNet, deviation)
+				engines[p] = new GenNetEngine(engines[bestPlayer].net, learningRate(mostPoints))
 			}
 		}
-
 	}
 	gameIteration += 1
 
@@ -193,7 +197,7 @@ function animate() {
 		if (!players[p].isDead) { noAlivePlayers += 1; }
 		if (players[p].points > mostPoints) mostPoints = players[p].points
 	}
-	if (noAlivePlayers == 0 || mostPoints > 100) {
+	if (noAlivePlayers == 0 || mostPoints > 200) {
 		resetGame(120);
 	}
 	const time = performance.now();
@@ -219,14 +223,16 @@ function animate() {
 	frames++;
 	if (time >= prevTime + 1000) {
 		let bestPlayer = 0;
+		let alivePlayers = 0;
 		for (let i = 1; i < players.length; i++) {
 			if (players[i].points > players[bestPlayer].points) {
 				bestPlayer = i;
 			}
+			if (!players[i].isDead) alivePlayers++;
 		}
 		let scoreboard = " " + players[bestPlayer].getName() + ": " + players[bestPlayer].points
 
-		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime)) + scoreboard + " Iteration: " + gameIteration + " Engine Iteration: " + engineIteration
+		document.getElementById("info").innerHTML = "fps: " + Math.round((frames * 1000) / (time - prevTime)) + scoreboard + " Iteration: " + gameIteration + " Engine Iteration: " + engineIteration + " Alive players: " + alivePlayers
 		frames = 0;
 		prevTime = time;
 	}
