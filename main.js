@@ -185,9 +185,8 @@ function resetGame(noPlayers) {
 
 		for (let p = 0; p < players.length; p++) {
 			if (p != prevBestEngine) {
-				let deviation = 0.001 / (mostPoints)
+				let deviation = 0.1 / (mostPoints * 10)
 				engines[p] = new GenNetEngine(prevBestEngine.net, deviation)
-
 			}
 		}
 
@@ -223,7 +222,7 @@ function animate() {
 			// console.log("players[p].object.position.y", normalize(0, 20, players[p].object.position.y), players[p].object.position.y)
 			// console.log("players[p].yVelocity", normalize(-1, 0.6, players[p].yVelocity),players[p].yVelocity)
 			// console.log("obstaclesInViewF[collisionObstacleId].positionY", normalize(0, 20, obstaclesInView[collisionObstacleId].positionY), obstaclesInView[collisionObstacleId].positionY)
-			console.log("obstaclesInView[collisionObstacleId].positionX", normalize(-20, 1, obstaclesInView[collisionObstacleId].positionX), obstaclesInView[collisionObstacleId].positionX)
+			// console.log("obstaclesInView[collisionObstacleId].positionX", normalize(-20, 1, obstaclesInView[collisionObstacleId].positionX), obstaclesInView[collisionObstacleId].positionX)
 			if (engines[p].getDecision(
 				normalize(0, 20, players[p].object.position.y),
 				normalize(-1, 0.6, players[p].yVelocity),

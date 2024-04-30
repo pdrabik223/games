@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 function getRandomInt(min, max) {
-    return min + Math.floor(Math.random() * (max - min));
+    return min + Math.random() * (max - min);
 }
 
 function degToRad(deg) {
