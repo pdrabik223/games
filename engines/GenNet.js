@@ -1,31 +1,8 @@
 function getRandomVal(min, max) {
-    //Math.random() * (max - min) + min;
-
     return (Math.random() * (max - min)) + min;
 }
 
 class Matrix {
-    // 
-    // let test = new Matrix(2, 2)
-    // test.data[0][0] = 3
-    // test.data[0][1] = 5
-    // test.data[1][0] = 4
-    // test.data[1][1] = 6
-
-
-    // let test2 = new Matrix(2, 2)
-    // test2.data[0][0] = 1
-    // test2.data[0][1] = 2
-    // test2.data[1][0] = 3
-    // test2.data[1][1] = 4
-
-    // console.log(test.toString())
-    // console.log("x")
-    // console.log(test2.toString())
-    // console.log("=")
-    // console.log(Matrix.sum(test, test2).toString())
-    // console.log("---------")
-
     constructor(width, height, data = null) {
         this.data = [];
         this.width = width;
@@ -213,7 +190,7 @@ class GenNetEngine {
 
     constructor(existingNet = null, deviation = 0) {
         if (existingNet == null)
-            this.net = new DeepNet([4, 7, 1])
+            this.net = new DeepNet([6, 9, 5, 1])
         else {
             this.net = DeepNet.copy(existingNet)
         }
@@ -222,17 +199,21 @@ class GenNetEngine {
             this.net.randomize(deviation)
     }
 
-    getDecision(playerYPosition, playerYAcceleration, obstacleYPosition, obstacleXPosition) {
-        var input = new Matrix(4, 1)
+    getDecision(playerYPosition, playerYAcceleration, obstacleYPosition, obstacleXPosition, obstacleWidth, obstacleHeight) {
+        var input = new Matrix(6, 1)
         input.data[0][0] = playerYPosition
         input.data[0][1] = playerYAcceleration
         input.data[0][2] = obstacleXPosition
         input.data[0][3] = obstacleYPosition
+        input.data[0][4] = obstacleWidth
+        input.data[0][5] = obstacleHeight
 
         if (playerYPosition < 0 || playerYPosition > 1) throw ("playerYPosition: " + playerYPosition)
         if (playerYAcceleration < 0 || playerYAcceleration > 1) throw ("playerYAcceleration: " + playerYAcceleration)
         if (obstacleXPosition < 0 || obstacleXPosition > 1) throw ("obstacleXPosition: " + obstacleXPosition)
         if (obstacleYPosition < 0 || obstacleYPosition > 1) throw ("obstacleYPosition: " + obstacleYPosition)
+        if (obstacleWidth < 0 || obstacleWidth > 1) throw ("obstacleWidth: " + obstacleWidth)
+        if (obstacleHeight < 0 || obstacleHeight > 1) throw ("obstacleHeight: " + obstacleHeight)
 
 
         let result = this.net.forwardProp(input).data[0][0]

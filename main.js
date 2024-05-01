@@ -125,6 +125,24 @@ function getNextObstacle(changeColor = false) {
 }
 
 function calculateCollision() {
+
+
+	// calculate collision with flor
+	for (let i = 0; i < players.length; i++) {
+		if (players[i].isDead) continue;
+
+		if (gameConfig["killingCelling"])
+			if (players[i].object.position.y == gameConfig["levelHeight"])
+				players[i].kill()
+
+
+		if (gameConfig["killingFlor"])
+			if (players[i].object.position.y == 0)
+				players[i].kill()
+	}
+
+
+
 	let collisionObstacleId = getObstacleInRange(3 + gameConfig["playerSize"]);
 
 	if (collisionObstacleId == null) {
@@ -136,15 +154,14 @@ function calculateCollision() {
 
 		let playerX = players[i].object.position.x
 		let playerY = players[i].object.position.y
-		// if (obstaclePositionY + 5 > players[i].object.position.y - gameConfig["playerSize"]) {
 		if (obstaclesInView[collisionObstacleId].calculateCollision(playerX, playerY)) {
+			// calculate collision with objects
 			players[i].kill()
-			// obstaclesInView[collisionObstacleId].changeColor(0xff3030)
 		}
-		// if (obstaclePositionY + 5 + 10 < players[i].object.position.y + gameConfig["playerSize"]) {
-		// players[i].kill()
-		// obstaclesInView[collisionObstacleId].changeColor(0xff3030)
+
+
 	}
+
 
 
 }
@@ -231,7 +248,15 @@ function animate() {
 				normalize(0, gameConfig["levelHeight"], players[p].object.position.y),
 				normalize(-1, 0.6, players[p].yVelocity),
 				normalize(0, gameConfig["levelHeight"] - 5, obstaclesInView[collisionObstacleId].positionY),
-				normalize(-gameConfig["levelWidth"] / 2, gameConfig["levelWidth"] / 2, obstaclesInView[collisionObstacleId].positionX))) { players[p].applyJump(); }
+				normalize(-gameConfig["levelWidth"] / 2, gameConfig["levelWidth"] / 2, obstaclesInView[collisionObstacleId].positionX),
+				normalize(gameConfig["obstacleMinSize"], gameConfig["obstacleMaxSize"], obstaclesInView[collisionObstacleId].width),
+				normalize(gameConfig["obstacleMinSize"], gameConfig["obstacleMaxSize"], obstaclesInView[collisionObstacleId].height)
+			)
+			
+			
+		)
+				
+				{ players[p].applyJump(); }
 		}
 	}
 

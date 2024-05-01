@@ -20,31 +20,28 @@ const ObstacleState = {
 
 class Obstacle {
     constructor(scene) {
-        this.width = getRandomFloat(2, 6)
-        this.height = getRandomFloat(2, 6)
+        this.width = getRandomFloat(gameConfig["obstacleMinSize"], gameConfig["obstacleMaxSize"])
+        this.height = getRandomFloat(gameConfig["obstacleMinSize"], gameConfig["obstacleMaxSize"])
 
         this.positionX = gameConfig["levelWidth"] / 2
         this.positionY = getRandomFloat(0, gameConfig["levelHeight"] - 5)
 
-        this.objects = []
         this.time = 0
-        this.objects[0] = new THREE.Mesh(new THREE.BoxGeometry(this.width, this.height, gameConfig["levelDepth"]), new THREE.MeshBasicMaterial({ color: 0x30ff30 }));
-        this.objects[0].position.x = this.positionX
-        this.objects[0].position.y = this.positionY
+        this.object = new THREE.Mesh(new THREE.BoxGeometry(this.width, this.height, gameConfig["levelDepth"]), new THREE.MeshBasicMaterial({ color: 0x30ff30 }));
+        this.object.position.x = this.positionX
+        this.object.position.y = this.positionY
         // this.addSecondBar()
         // this.addRotation()
 
         this.state = ObstacleState.Incoming
-        for (let i = 0; i < this.objects.length; i++) {
-            scene.add(this.objects[i]);
-        }
+        scene.add(this.object);
+
 
     }
 
     addRotation() {
-        for (let i = 0; i < this.objects.length; i++) {
-            this.objects[i].rotateZ(degToRad(getRandomFloat(-25, 25)));
-        }
+        this.object.rotateZ(degToRad(getRandomFloat(-25, 25)));
+
     }
 
 
@@ -57,9 +54,7 @@ class Obstacle {
             this.positionX -= 0.012 * elapsedTime * gameConfig["gameSpeed"];
         }
 
-        for (let i = 0; i < this.objects.length; i++) {
-            this.objects[i].position.x = this.positionX;
-        }
+        this.object.position.x = this.positionX;
 
         if (this.positionX < 3 && this.positionX > -3) {
             if (this.state == ObstacleState.Incoming) {
@@ -74,15 +69,12 @@ class Obstacle {
         return false
     }
     removeFromScene(scene) {
-        for (let i = 0; i < this.objects.length; i++) {
-            scene.remove(this.objects[i])
-        }
+        scene.remove(this.object)
+
 
     }
     changeColor(color) {
-        for (let i = 0; i < this.objects.length; i++) {
-            this.objects[i].material.color.setHex(color);
-        }
+        this.object.material.color.setHex(color);
 
     }
     calculateCollision(playerX, playerY) {

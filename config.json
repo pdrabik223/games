@@ -1,8 +1,11 @@
 {
     "levelHeight": 40,
     "levelWidth": 120,
-    "levelDepth": 10,
+    "levelDepth": 40,
     "playerSize": 0.7,
-    "gameSpeed": 2,
-    "killing_flor": true
+    "gameSpeed": 4,
+    "obstacleMinSize": 6,
+    "obstacleMaxSize": 12,
+    "killingFlor": true,
+    "killingCelling": true
 }
