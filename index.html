@@ -19,13 +19,24 @@
 </head>
 
 <body>
-	<!-- <nav>
-        <a href="./index.html">Home</a>
-        <a href="./unittest.html">About</a>
-    </nav> -->
+
 	<div id="info">Flappy bird</div>
+	<span class="sideBySide" id="generalButtons">
+		<button id="showSettings" class="button">Show settings</button>
+		<button id="restartGame" class="button">Restart Game</button>
+	</span>
+	<div id="settings">
+		<h3 id="gameModeSelectionText">Game Mode: Single Player</h3>
+		<span class="sideBySide">
+			<button class="button gameModeSelectionButton" id="buttonSinglePlayer">Single Player</button>
+			<button class="button gameModeSelectionButton" id="buttonMlTraining">ML Training</button>
+		</span>
+	</div>
+
+
 	<script type="module" src="./main.js"></script>
-	<script type="module" src="tests/unittest.js"></script>
+	<script type="module" src="./settings.js"></script>
+	<!-- <script type="module" src="tests/unittest.js"></script> -->
 
 </body>
 

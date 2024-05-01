@@ -6,6 +6,16 @@ import { Matrix, GenNetEngine } from "./engines/GenNet.js"
 
 import gameConfig from './config.json' with { type: 'json' };
 
+function getGameMode() {
+	console.log("background", document.getElementById("gameModeSelectionText").innerHTML)
+	if (document.getElementById("gameModeSelectionText").innerHTML.includes("Single Player"))
+		return "singlePlayer"
+	else
+		return "mlTraining"
+
+}
+
+const gameMode = getGameMode()
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
@@ -43,7 +53,6 @@ function handleObstacles() {
 				for (let p = 0; p < players.length; p++) {
 					players[p].addPoint();
 				}
-
 			}
 
 			if (obstaclesInView[i].state == ObstacleState.Incoming) {
@@ -163,10 +172,9 @@ function calculateCollision() {
 	}
 
 
-
 }
 function learningRate(noPoints) {
-	return 1 / (noPoints * 1.1)
+	return 1 / (noPoints * 0.5)
 
 }
 var engines, frames, prevTime, players = [], obstaclesInView = [], gameIteration = 0, engineIteration = 0
@@ -252,11 +260,9 @@ function animate() {
 				normalize(gameConfig["obstacleMinSize"], gameConfig["obstacleMaxSize"], obstaclesInView[collisionObstacleId].width),
 				normalize(gameConfig["obstacleMinSize"], gameConfig["obstacleMaxSize"], obstaclesInView[collisionObstacleId].height)
 			)
-			
-			
-		)
-				
-				{ players[p].applyJump(); }
+
+
+			) { players[p].applyJump(); }
 		}
 	}
 
