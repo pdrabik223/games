@@ -2,6 +2,7 @@
     "levelHeight": 40,
     "levelWidth": 120,
     "levelDepth": 10,
-    "playerSize": 0.7
-    
+    "playerSize": 0.7,
+    "gameSpeed": 2,
+    "killing_flor": true
 }

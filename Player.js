@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import gameConfig from './config.json' assert { type: 'json' };
-console.log(gameConfig)
+import gameConfig from './config.json' with { type: 'json' };
 
 var nameList = [
     'Time', 'Past', 'Future', 'Dev',
@@ -42,6 +41,7 @@ class Player {
         this.yVelocity = 0;
         this.timeOfLastFrame = 0;
         this.timeOfLastJump = -100;
+        this.timeOfLastLeftShift = 0
         this.points = 0;
         this.playerId = playerId
         this.isDead = false
@@ -60,6 +60,7 @@ class Player {
         }
     }
     applyGravity() {
+        if (this.isDead) return
 
         if (this.timeOfLastFrame == 0) {
             this.timeOfLastFrame = performance.now();
@@ -68,7 +69,7 @@ class Player {
             this.timeOfLastFrame = performance.now();
 
             if (this.yVelocity > -1) {
-                this.yVelocity -= 0.0002 * elapsedTime
+                this.yVelocity -= 0.0002 * elapsedTime * gameConfig["gameSpeed"]
             }
             this.object.position.y += this.yVelocity * elapsedTime
         }
@@ -81,13 +82,27 @@ class Player {
         }
 
     }
+    applyShift() {
+        if (!this.isDead) return
+
+        if (this.timeOfLastLeftShift == 0) {
+            this.timeOfLastLeftShift = performance.now();
+        } else {
+            let elapsedTime = performance.now() - this.timeOfLastLeftShift;
+            this.timeOfLastLeftShift = performance.now();
+            this.object.position.x -= 0.012 * elapsedTime * gameConfig["gameSpeed"];
+        }
+
+        // this.object.position.x = this.positionX;
+
+    }
     kill() {
         this.isDead = true;
     }
     applyJump() {
         if (this.isDead) { return }
         let elapsedTime = performance.now() - this.timeOfLastJump;
-        if (elapsedTime > 10) {
+        if (elapsedTime > 10 / gameConfig["gameSpeed"]) {
             this.timeOfLastJump = performance.now();
             this.yVelocity = 0.06;
         }

@@ -1,7 +1,9 @@
 import * as THREE from 'three';
-import gameConfig from './config.json' assert { type: 'json' };
-console.log(gameConfig)
-function getRandomInt(min, max) {
+import gameConfig from './config.json' with { type: 'json' };
+
+
+
+function getRandomFloat(min, max) {
     return min + Math.random() * (max - min);
 }
 
@@ -18,15 +20,18 @@ const ObstacleState = {
 
 class Obstacle {
     constructor(scene) {
-        this.positionX = gameConfig["levelWidth"]/2
-        this.positionY = getRandomInt(5, gameConfig["levelHeight"] - 5 - 20)
+        this.width = getRandomFloat(2, 6)
+        this.height = getRandomFloat(2, 6)
+
+        this.positionX = gameConfig["levelWidth"] / 2
+        this.positionY = getRandomFloat(0, gameConfig["levelHeight"] - 5)
 
         this.objects = []
         this.time = 0
-        this.objects[0] = new THREE.Mesh(new THREE.BoxGeometry(5, 5, gameConfig["levelDepth"]), new THREE.MeshBasicMaterial({ color: 0x30ff30 }));
+        this.objects[0] = new THREE.Mesh(new THREE.BoxGeometry(this.width, this.height, gameConfig["levelDepth"]), new THREE.MeshBasicMaterial({ color: 0x30ff30 }));
         this.objects[0].position.x = this.positionX
         this.objects[0].position.y = this.positionY
-        this.addSecondBar()
+        // this.addSecondBar()
         // this.addRotation()
 
         this.state = ObstacleState.Incoming
@@ -35,15 +40,10 @@ class Obstacle {
         }
 
     }
-    addSecondBar() {
-        this.objects[1] = new THREE.Mesh(new THREE.BoxGeometry(5, 5, gameConfig["levelDepth"]), new THREE.MeshBasicMaterial({ color: 0x30ff30 }));
-        this.objects[1].position.x = this.positionX
-        this.objects[1].position.y = 20 + this.positionY
 
-    }
     addRotation() {
         for (let i = 0; i < this.objects.length; i++) {
-            this.objects[i].rotateZ(degToRad(getRandomInt(-25, 25)));
+            this.objects[i].rotateZ(degToRad(getRandomFloat(-25, 25)));
         }
     }
 
@@ -54,7 +54,7 @@ class Obstacle {
         } else {
             let elapsedTime = performance.now() - this.time;
             this.time = performance.now();
-            this.positionX -= 0.012 * elapsedTime;
+            this.positionX -= 0.012 * elapsedTime * gameConfig["gameSpeed"];
         }
 
         for (let i = 0; i < this.objects.length; i++) {
@@ -85,7 +85,21 @@ class Obstacle {
         }
 
     }
+    calculateCollision(playerX, playerY) {
+        // assuming that player is a sphere
 
+        let topLeftCornerX = this.positionX - this.width / 2
+        let topLeftCornerY = this.positionY - this.height / 2
+        let playerRadius = gameConfig["playerSize"]
+
+        if (playerX + playerRadius >= topLeftCornerX && playerX - playerRadius <= topLeftCornerX + this.width)
+
+            if (playerY + playerRadius >= topLeftCornerY && playerY - playerRadius <= topLeftCornerY + this.height)
+
+                return true
+
+        return false
+    }
 }
 
 export { Obstacle, ObstacleState };
